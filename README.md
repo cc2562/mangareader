@@ -1,16 +1,20 @@
 # mangareader
 
-A app to read mange
+一个使用flutter编写的漫画阅读软件
 
-## Getting Started
+软件处于超级早期开发阶段
 
-This project is a starting point for a Flutter application.
+## 功能
 
-A few resources to get you started if this is your first Flutter project:
+### 已实现
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- 跳转页面
+- 简单的浏览纯图片格式漫画图片
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### 预计实现
+
+- 对于epub格式漫画的解析以及特殊优化
+- 自动播放
+- 漫画管理（书架）
+- 压缩包文件直接加载
+- 
