@@ -1,79 +1,75 @@
+import 'dart:convert';
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:glass/glass.dart';
 import 'package:glassmorphism/glassmorphism.dart';
 import 'package:mangareader/read/way/onlyimg.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class readview extends StatefulWidget {
-  const readview({super.key});
-
+  Map conmicmeta = {};
+  //readview({super.key,required conmicmeta});
+  readview({Key? key, required this.conmicmeta}) : super(key: key);
   @override
   State<readview> createState() => _readviewState();
 }
 
 class _readviewState extends State<readview> {
   //控制页面可见
-  bool control = false, manchange = false;
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+  bool control = false, manchange = false, hasloading = false;
   double page = 0, nows = 0;
-  int total = 20;
-
+  int total = 1;
+  List imagelist = [], phatitle = [], phapage = [];
+  late Directory docDir, conDir;
   final ItemScrollController jumplist = new ItemScrollController();
   final ItemPositionsListener itemPositionsListener =
       ItemPositionsListener.create();
   final ScrollOffsetController scrollOffsetController =
       ScrollOffsetController();
-
   //列表控制项目
   //测试数据
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    /*
-    itemPositionsListener.itemPositions.addListener(() {
-      if (manchange) {
-        print("忽略");
-      } else {
-        setState(() {
-          page =
-              itemPositionsListener.itemPositions.value.first.index.toDouble();
-        });
-      }
-    });
-     */
+    print(widget.conmicmeta);
+    getall();
   }
 
-  List imgtest = [
-    "https://img1.baidu.com/it/u=277732813,1743527573&fm=253&app=138&size=w931&n=0&f=JPEG&fmt=auto?sec=1688922000&t=5c2537991ee121488fccb64485298dd3",
-    "https://img1.baidu.com/it/u=4150213847,3988298928&fm=253&app=138&size=w931&n=0&f=JPEG&fmt=auto?sec=1688922000&t=0f942eb564dcf8f502c367e33aef0fe9",
-    "https://img2.baidu.com/it/u=108142487,1385064156&fm=253&app=138&size=w931&n=0&f=JPEG&fmt=auto?sec=1688922000&t=174a2d5069c921dcbb64a5a2bb91c588",
-    "https://img1.baidu.com/it/u=2645538630,2991364592&fm=253&app=138&size=w931&n=0&f=JPEG&fmt=auto?sec=1688922000&t=eda6e8c762a5f01899143aaee426d321",
-    "https://img0.baidu.com/it/u=3481849803,3117762343&fm=253&app=138&size=w931&n=0&f=JPEG&fmt=auto?sec=1688922000&t=a6d458f16d75611cf061230377f4954b",
-    "https://img1.baidu.com/it/u=1901480004,3631773851&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=1011",
-    "https://img1.baidu.com/it/u=277732813,1743527573&fm=253&app=138&size=w931&n=0&f=JPEG&fmt=auto?sec=1688922000&t=5c2537991ee121488fccb64485298dd3",
-    "https://img1.baidu.com/it/u=4150213847,3988298928&fm=253&app=138&size=w931&n=0&f=JPEG&fmt=auto?sec=1688922000&t=0f942eb564dcf8f502c367e33aef0fe9",
-    "https://img2.baidu.com/it/u=108142487,1385064156&fm=253&app=138&size=w931&n=0&f=JPEG&fmt=auto?sec=1688922000&t=174a2d5069c921dcbb64a5a2bb91c588",
-    "https://img1.baidu.com/it/u=2645538630,2991364592&fm=253&app=138&size=w931&n=0&f=JPEG&fmt=auto?sec=1688922000&t=eda6e8c762a5f01899143aaee426d321",
-    "https://img0.baidu.com/it/u=3481849803,3117762343&fm=253&app=138&size=w931&n=0&f=JPEG&fmt=auto?sec=1688922000&t=a6d458f16d75611cf061230377f4954b",
-    "https://img1.baidu.com/it/u=1901480004,3631773851&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=1011",
-    "https://img1.baidu.com/it/u=277732813,1743527573&fm=253&app=138&size=w931&n=0&f=JPEG&fmt=auto?sec=1688922000&t=5c2537991ee121488fccb64485298dd3",
-    "https://img1.baidu.com/it/u=4150213847,3988298928&fm=253&app=138&size=w931&n=0&f=JPEG&fmt=auto?sec=1688922000&t=0f942eb564dcf8f502c367e33aef0fe9",
-    "https://img2.baidu.com/it/u=108142487,1385064156&fm=253&app=138&size=w931&n=0&f=JPEG&fmt=auto?sec=1688922000&t=174a2d5069c921dcbb64a5a2bb91c588",
-    "https://img1.baidu.com/it/u=2645538630,2991364592&fm=253&app=138&size=w931&n=0&f=JPEG&fmt=auto?sec=1688922000&t=eda6e8c762a5f01899143aaee426d321",
-    "https://img0.baidu.com/it/u=3481849803,3117762343&fm=253&app=138&size=w931&n=0&f=JPEG&fmt=auto?sec=1688922000&t=a6d458f16d75611cf061230377f4954b",
-    "https://img1.baidu.com/it/u=1901480004,3631773851&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=1011",
-    "https://img1.baidu.com/it/u=277732813,1743527573&fm=253&app=138&size=w931&n=0&f=JPEG&fmt=auto?sec=1688922000&t=5c2537991ee121488fccb64485298dd3",
-    "https://img1.baidu.com/it/u=4150213847,3988298928&fm=253&app=138&size=w931&n=0&f=JPEG&fmt=auto?sec=1688922000&t=0f942eb564dcf8f502c367e33aef0fe9",
-    "https://img2.baidu.com/it/u=108142487,1385064156&fm=253&app=138&size=w931&n=0&f=JPEG&fmt=auto?sec=1688922000&t=174a2d5069c921dcbb64a5a2bb91c588",
-    "https://img1.baidu.com/it/u=2645538630,2991364592&fm=253&app=138&size=w931&n=0&f=JPEG&fmt=auto?sec=1688922000&t=eda6e8c762a5f01899143aaee426d321",
-    "https://img0.baidu.com/it/u=3481849803,3117762343&fm=253&app=138&size=w931&n=0&f=JPEG&fmt=auto?sec=1688922000&t=a6d458f16d75611cf061230377f4954b",
-    "https://img1.baidu.com/it/u=1901480004,3631773851&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=1011"
-  ];
+  void getall() async {
+    docDir = await getApplicationDocumentsDirectory();
+    conDir = new Directory('${docDir.path}/comic/${widget.conmicmeta['uid']}');
+
+    File metafile = new File('${conDir.path}/meta.json');
+    String metastr = metafile.readAsStringSync();
+    Map meta = json.decode(metastr);
+    print(meta);
+    total = meta['pages'];
+    phatitle = json.decode(meta['phatitle']);
+    phapage = json.decode(meta['phapage']);
+    print(phapage);
+    print(phatitle);
+    Stream<FileSystemEntity> fileList =
+        Directory('${conDir.path}/image/').list();
+
+    await for (FileSystemEntity fileSystemEntity in fileList) {
+      //print('$fileSystemEntity');
+      imagelist.add(fileSystemEntity.path);
+    }
+    print("WAN");
+    setState(() {
+      hasloading = true;
+    });
+  }
+
   Widget viewlist() {
     return ScrollablePositionedList.builder(
+      //reverse: true,
       itemPositionsListener: itemPositionsListener,
       physics: PageScrollPhysics(),
       scrollDirection: Axis.horizontal,
@@ -89,7 +85,7 @@ class _readviewState extends State<readview> {
                 width: 100.w,
                 height: 100.h,
                 child: Image(
-                  image: NetworkImage(imgtest[now]),
+                  image: FileImage(File(imagelist[now])),
                   fit: BoxFit.contain,
                 ),
               ),
@@ -105,9 +101,41 @@ class _readviewState extends State<readview> {
     );
   }
 
+  Widget loading() {
+    return Container(
+      width: 100.w,
+      alignment: Alignment.center,
+      height: 100.h,
+      child: CircularProgressIndicator(),
+    );
+  }
+
+  Widget toshow() {
+    if (hasloading) {
+      return viewlist();
+    } else {
+      return loading();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
+      drawer: Drawer(
+        child: ListView.builder(
+          itemBuilder: (context, int index) {
+            return ListTile(
+              onTap: () {
+                jumplist.jumpTo(index: int.parse(phapage[index]) - 1);
+              },
+              title: Text(phatitle[index]),
+              subtitle: Text(phapage[index]),
+            );
+          },
+          itemCount: phapage.length,
+        ),
+      ),
       body: GestureDetector(
         onTapDown: (de) {
           print("点击");
@@ -137,7 +165,7 @@ class _readviewState extends State<readview> {
                   //alignment: Alignment.center,
                   height: 100.h,
                   color: Colors.black,
-                  child: viewlist()),
+                  child: toshow()),
               //控制层
               Offstage(
                 offstage: !control,
@@ -188,7 +216,7 @@ class _readviewState extends State<readview> {
                                           height: 6.h,
                                           //color: Colors.yellow,
                                           child: Text(
-                                            "1话 这是一本测试漫画",
+                                            widget.conmicmeta['title'],
                                             style: TextStyle(
                                                 fontSize: 18.sp,
                                                 color: Colors.white,
@@ -209,7 +237,10 @@ class _readviewState extends State<readview> {
                                               color: Colors.white,
                                               size: 8.w,
                                             ),
-                                            onPressed: () {},
+                                            onPressed: () {
+                                              _scaffoldKey.currentState
+                                                  ?.openDrawer();
+                                            },
                                           ),
                                         ),
                                         flex: 1,
