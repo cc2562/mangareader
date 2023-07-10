@@ -20,11 +20,11 @@ Future<String> allsec(String filepath) async {
   final Directory tempDir =
       await getTemporaryDirectory(); // Use an InputFileStream to access the zip file without storing it in memory.
   Directory directory = new Directory('${tempDir.path}/epub');
-  if (await File(directory.path).exists()) {
-    directory.deleteSync();
-    print("文件删除");
-  }
+  try {
+    directory.deleteSync(recursive: true);
+  } catch (e) {}
   directory.createSync();
+
   //创建epub临时目录
   File orgepub = File(filepath);
   //创建空文件
@@ -233,7 +233,11 @@ Future<String> savefile(Map<String, String> orgmap) async {
   var coverexe = p.extension('${directory.path}${orgmap["coverpath"]}');
   File createfile = new File('${saveDir.path}/cover$coverexe');
   createfile.createSync();
-  coverfile.copySync('${saveDir.path}/cover$coverexe');
+  try {
+    coverfile.copySync('${saveDir.path}/cover$coverexe');
+  } catch (e) {
+    print("Wrong");
+  }
   //转移创作图片
 
   Map<String, dynamic> mangameta = {
@@ -247,6 +251,8 @@ Future<String> savefile(Map<String, String> orgmap) async {
     'pages': nowitem,
     'phapage': json.encode(phapage),
     'phatitle': json.encode(phatitle),
+    'readpage': "0",
+    'percentage': "0%",
   };
   String finalsave = json.encode(mangameta);
   File finalcreate = new File('${saveDir.path}/meta.json');
@@ -258,6 +264,9 @@ Future<String> savefile(Map<String, String> orgmap) async {
     'title': title,
     'cover': 'cover$coverexe',
     'author': author,
+    'readpage': "0",
+    'percentage': "0%",
+    'time': DateTime.now().microsecondsSinceEpoch,
   };
   insertsql(mangamaps);
   print("任务结束");

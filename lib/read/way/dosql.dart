@@ -41,12 +41,12 @@ Future<void> insertsql(Map mangamap) async {
     onCreate: (db, version) {
       // Run the CREATE TABLE statement on the database.
       return db.execute(
-        'CREATE TABLE allcomic(uid TEXT PRIMARY KEY, title TEXT, cover TEXT,author TEXT)',
+        'CREATE TABLE allcomic(uid TEXT PRIMARY KEY, title TEXT, cover TEXT,author TEXT,readpage TEXT,percentage TEXT,time INTEGER)',
       );
     },
     // Set the version. This executes the onCreate function and provides a
     // path to perform database upgrades and downgrades.
-    version: 1,
+    version: 3,
   );
   final db = await database;
 
@@ -59,6 +59,9 @@ Future<void> insertsql(Map mangamap) async {
     'title': mangamap['title'],
     'cover': mangamap['cover'],
     'author': mangamap['author'],
+    'readpage': mangamap['readpage'],
+    'percentage': mangamap['percentage'],
+    'time': mangamap['time']
   };
   await db.insert(
     'allcomic',
@@ -78,15 +81,64 @@ Future<List<Map<String, dynamic>>> allconmic() async {
     onCreate: (db, version) {
       // Run the CREATE TABLE statement on the database.
       return db.execute(
-        'CREATE TABLE allcomic(uid TEXT PRIMARY KEY, title TEXT, cover TEXT,author TEXT)',
+        'CREATE TABLE allcomic(uid TEXT PRIMARY KEY, title TEXT, cover TEXT,author TEXT,readpage TEXT,percentage TEXT,time INTEGER)',
       );
     },
     // Set the version. This executes the onCreate function and provides a
     // path to perform database upgrades and downgrades.
-    version: 1,
+    version: 3,
   );
   final db = await database;
-  final List<Map<String, dynamic>> maps = await db.query('allcomic');
+  final List<Map<String, dynamic>> maps =
+      await db.query('allcomic', orderBy: 'time desc');
   print(maps.toString());
   return maps;
+}
+
+Future<List<Map<String, dynamic>>> getone(String uid) async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // Get a reference to the database.
+  print(await getDatabasesPath());
+  final database = openDatabase(
+    // Set the path to the database. Note: Using the `join` function from the
+    // `path` package is best practice to ensure the path is correctly
+    // constructed for each platform.
+    join(await getDatabasesPath(), 'comic.db'),
+    // Set the version. This executes the onCreate function and provides a
+    // path to perform database upgrades and downgrades.
+  );
+  final db = await database;
+  final List<Map<String, dynamic>> maps =
+      await db.query('allcomic', where: '"group" = ?', whereArgs: [uid]);
+  print(maps.toString());
+  return maps;
+}
+
+Future<void> changeread(Map<String, Object?> changed) async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // Get a reference to the database.
+  print(await getDatabasesPath());
+  final database = openDatabase(
+    // Set the path to the database. Note: Using the `join` function from the
+    // `path` package is best practice to ensure the path is correctly
+    // constructed for each platform.
+    join(await getDatabasesPath(), 'comic.db'),
+    // Set the version. This executes the onCreate function and provides a
+    // path to perform database upgrades and downgrades.
+  );
+  // Get a reference to the database.
+  final db = await database;
+  print(changed);
+  // Update the given Dog.
+  await db.update(
+    'allcomic',
+    changed,
+    // Ensure that the Dog has a matching id.
+    where: 'uid = ?',
+    // Pass the Dog's id as a whereArg to prevent SQL injection.
+    whereArgs: [changed['uid']],
+  );
+  final List<Map<String, dynamic>> maps = await db
+      .query('allcomic', where: '"uid" = ?', whereArgs: [changed['uid']]);
+  print("!@#22" + maps.toString());
 }

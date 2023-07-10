@@ -38,6 +38,16 @@ class _libraryviewState extends State<libraryview>
     print(conDir);
   }
 
+  String showpage(String percentage) {
+    String thing = percentage.replaceAll("%", '');
+    double percent = double.parse(thing);
+    if (percent >= 100) {
+      return "已读完";
+    }
+    print(percent);
+    return percentage;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,9 +56,25 @@ class _libraryviewState extends State<libraryview>
         actions: [
           IconButton(
               onPressed: () async {
+                showDialog(
+                    context: context,
+                    builder: (ctx) {
+                      return SimpleDialog(
+                        children: [
+                          Container(
+                            margin: EdgeInsets.all(2.w),
+                            child: Column(
+                              children: [
+                                Text("正在导入中"),
+                                Text("支持 epub zip rar cbz cbr格式的导入")
+                              ],
+                            ),
+                          ),
+                        ],
+                      );
+                    });
                 FilePickerResult? result =
                     await FilePicker.platform.pickFiles();
-
                 if (result != null) {
                   String exee = p.extension(result.files.single.path!);
                   print(result.files.single.path!);
@@ -56,10 +82,12 @@ class _libraryviewState extends State<libraryview>
                   if (exee == ".epub") {
                     await allsec(result.files.single.path!);
                     getall();
+                    Navigator.pop(context);
                   }
                   //File file = File(result.files.single.path!);
                 } else {
                   // User canceled the picker
+                  Navigator.pop(context);
                 }
               },
               icon: Icon(Icons.add))
@@ -73,7 +101,7 @@ class _libraryviewState extends State<libraryview>
           child: GridView.builder(
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3, //横轴三个子widget
-                childAspectRatio: 0.525,
+                childAspectRatio: 0.70,
                 crossAxisSpacing: 1.w,
                 mainAxisSpacing: 1.w),
             itemBuilder: (context, now) {
@@ -84,17 +112,73 @@ class _libraryviewState extends State<libraryview>
               print(conmicpath);
               return GestureDetector(
                 child: Container(
-                  height: 8.h,
+                  height: 100.h,
                   width: 100.w,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    image: DecorationImage(
-                        fit: BoxFit.cover, image: FileImage(File(coverpath))),
-                  ),
                   child: Column(
                     children: [
-                      Text(details['title']),
-                      Text(details['author']),
+                      Padding(
+                          padding: EdgeInsets.fromLTRB(2.w, 0, 2.w, 0),
+                          child: Stack(
+                            children: [
+                              Container(
+                                width: 100.w,
+                                height: 16.h,
+                                alignment: Alignment.center,
+                                child: Padding(
+                                  padding: EdgeInsets.fromLTRB(1.w, 0, 1.w, 0),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        details['title'],
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 15.sp,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Text(
+                                        details['author'],
+                                        style: TextStyle(
+                                          color: Colors.grey.shade100,
+                                          fontSize: 12.sp,
+                                          fontWeight: FontWeight.normal,
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(5),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.withOpacity(0.5),
+                                        offset: Offset(2.0, 2.0),
+                                        blurRadius: 4.0,
+                                      ),
+                                    ],
+                                    color: Theme.of(context).primaryColor),
+                              ),
+                              Container(
+                                width: 100.w,
+                                height: 16.h,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(5),
+                                  image: DecorationImage(
+                                      fit: BoxFit.cover,
+                                      image: FileImage(File(coverpath))),
+                                ),
+                              ),
+                            ],
+                          )),
+                      Container(
+                        padding: EdgeInsets.fromLTRB(2.w, 0, 0, 0),
+                        width: 100.w,
+                        alignment: Alignment.centerLeft,
+                        child: Row(
+                          children: [Text(showpage(details['percentage']))],
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -104,7 +188,29 @@ class _libraryviewState extends State<libraryview>
                       MaterialPageRoute(
                           builder: (context) => readview(
                                 conmicmeta: details,
-                              )));
+                              ))).then((value) {
+                    showDialog(
+                        context: context,
+                        builder: (ctx) {
+                          return SimpleDialog(
+                            children: [
+                              Container(
+                                width: 15.w,
+                                height: 15.w,
+                                alignment: Alignment.center,
+                                child: CircularProgressIndicator(),
+                              )
+                            ],
+                          );
+                        });
+
+                    Future.delayed(Duration(milliseconds: 500), () {
+                      setState(() async {
+                        getall();
+                        Navigator.pop(context);
+                      });
+                    });
+                  });
                 },
               );
             },

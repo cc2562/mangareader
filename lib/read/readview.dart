@@ -1,12 +1,15 @@
 import 'dart:convert';
+import 'dart:ffi';
 import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:glass/glass.dart';
 import 'package:glassmorphism/glassmorphism.dart';
+import 'package:mangareader/read/way/dosql.dart';
 import 'package:mangareader/read/way/onlyimg.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:photo_view/photo_view.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
@@ -61,21 +64,51 @@ class _readviewState extends State<readview> {
       //print('$fileSystemEntity');
       imagelist.add(fileSystemEntity.path);
     }
+    print(widget.conmicmeta);
     print("WAN");
     setState(() {
       hasloading = true;
+      // jumpit();
     });
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    print(itemPositionsListener.itemPositions.value.first.index.toString());
+    print(
+        (itemPositionsListener.itemPositions.value.first.index / total) * 100);
+    double perr =
+        (itemPositionsListener.itemPositions.value.first.index / (total - 1)) *
+            100;
+    String endpage = perr.toStringAsFixed(1) + "%";
+    Map<String, Object?> dochange = {
+      'uid': widget.conmicmeta['uid'],
+      'title': widget.conmicmeta['title'],
+      'cover': widget.conmicmeta['cover'],
+      'author': widget.conmicmeta['author'],
+      'readpage':
+          itemPositionsListener.itemPositions.value.first.index.toString(),
+      'percentage': endpage,
+      'time': DateTime.now().microsecondsSinceEpoch,
+    };
+    changeread(dochange);
   }
 
   Widget viewlist() {
     return ScrollablePositionedList.builder(
       //reverse: true,
+      initialScrollIndex: int.parse(widget.conmicmeta['readpage']),
       itemPositionsListener: itemPositionsListener,
       physics: PageScrollPhysics(),
       scrollDirection: Axis.horizontal,
       itemScrollController: jumplist,
       scrollOffsetController: scrollOffsetController,
       itemBuilder: (context, now) {
+// Find the ScaffoldMessenger in the widget tree
+// and use it to show a SnackBar
+
         return Container(
           width: 100.w,
           height: 100.h,
@@ -84,15 +117,21 @@ class _readviewState extends State<readview> {
               Container(
                 width: 100.w,
                 height: 100.h,
-                child: Image(
-                  image: FileImage(File(imagelist[now])),
-                  fit: BoxFit.contain,
+                child: PhotoView(
+                  imageProvider: FileImage(File(imagelist[now])),
+                  //fit: BoxFit.contain,
                 ),
               ),
-              Text(
-                now.toString(),
-                style: TextStyle(color: Colors.white, fontSize: 38.sp),
-              )
+              Container(
+                  width: 100.w,
+                  height: 100.h,
+                  alignment: Alignment.bottomLeft,
+                  child: Container(
+                    child: Text(
+                      '${now + 1}/$total',
+                      style: TextStyle(color: Colors.white, fontSize: 12.sp),
+                    ),
+                  ))
             ],
           ),
         );
@@ -137,19 +176,32 @@ class _readviewState extends State<readview> {
         ),
       ),
       body: GestureDetector(
-        onTapDown: (de) {
+        onTapUp: (de) {
           print("点击");
           final size = MediaQuery.of(context).size;
           final width = size.width;
+          final height = size.height;
           double nowpage =
               itemPositionsListener.itemPositions.value.first.index.toDouble();
           print(width / 2);
-
-          if (de.globalPosition.dx >= width / 2 && manchange == false) {
-            jumplist.jumpTo(index: (nowpage + 1).toInt());
+          final erfen = width / 3;
+          final erfenh = height / 5;
+          if (de.globalPosition.dx >= erfen &&
+              de.globalPosition.dx <= (width - erfen) &&
+              de.globalPosition.dy >= (erfenh * 2) &&
+              de.globalPosition.dy <= (height - (erfenh * 2))) {
+            setState(() {
+              page = itemPositionsListener.itemPositions.value.first.index
+                  .toDouble();
+              control = !control;
+            });
           } else {
-            if (nowpage >= 1 && manchange == false) {
-              jumplist.jumpTo(index: (nowpage - 1).toInt());
+            if (de.globalPosition.dx >= width / 2 && manchange == false) {
+              jumplist.jumpTo(index: (nowpage + 1).toInt());
+            } else {
+              if (nowpage >= 1 && manchange == false) {
+                jumplist.jumpTo(index: (nowpage - 1).toInt());
+              }
             }
           }
           print(de.globalPosition.dx);
@@ -414,53 +466,6 @@ class _readviewState extends State<readview> {
                 ),
               ),
               //触摸层
-              Offstage(
-                // If the widget is visible, animate to 0.0 (invisible).
-                // If the widget is hidden, animate to 1.0 (fully visible).
-                //opacity: control ? 0.0 : 1.0,
-                //duration: const Duration(milliseconds: 250),
-                offstage: control,
-                child: Column(
-                  children: [
-                    GestureDetector(
-                      child: Container(
-                        width: 100.w,
-                        height: 25.h,
-                        color: Colors.transparent,
-                      ),
-                      onTap: () {
-                        setState(() {
-                          page = itemPositionsListener
-                              .itemPositions.value.first.index
-                              .toDouble();
-                          print("YES");
-                          control = !control;
-                        });
-                      },
-                    ),
-                    Container(
-                      width: 100.w,
-                      height: 50.h,
-                      // color: Colors.red,
-                    ),
-                    GestureDetector(
-                      child: Container(
-                        width: 100.w,
-                        height: 25.h,
-                        color: Colors.transparent,
-                      ),
-                      onTap: () {
-                        setState(() {
-                          page = itemPositionsListener
-                              .itemPositions.value.first.index
-                              .toDouble();
-                          control = !control;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              )
             ],
           ),
         ),
