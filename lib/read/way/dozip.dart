@@ -104,7 +104,7 @@ Future<String> sortpart(String basename) async {
       sortmap.addAll({
         nowid: name,
       });
-      zhanjie.add(nowid.toString());
+      zhanjie.add(name);
       nowid++;
     }
   });
