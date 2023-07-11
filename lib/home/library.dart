@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mangareader/read/way/dosql.dart';
+import 'package:mangareader/read/way/dozip.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:path/path.dart' as p;
@@ -21,6 +22,7 @@ class _libraryviewState extends State<libraryview>
     with AutomaticKeepAliveClientMixin {
   List allconmics = [];
   late Directory docDir, conDir;
+  String digshow = "支持 epub zip rar cbz cbr格式的导入";
   @override
   void initState() {
     // TODO: implement initState
@@ -28,7 +30,7 @@ class _libraryviewState extends State<libraryview>
     getall();
   }
 
-  void getall() async {
+  Future<bool> getall() async {
     allconmics = await allconmic();
     setState(() {
       allconmics = allconmics;
@@ -36,6 +38,7 @@ class _libraryviewState extends State<libraryview>
     docDir = await getApplicationDocumentsDirectory();
     conDir = new Directory('${docDir.path}/comic');
     print(conDir);
+    return true;
   }
 
   String showpage(String percentage) {
@@ -57,21 +60,21 @@ class _libraryviewState extends State<libraryview>
           IconButton(
               onPressed: () async {
                 showDialog(
+                    barrierDismissible: false,
                     context: context,
                     builder: (ctx) {
-                      return SimpleDialog(
-                        children: [
-                          Container(
-                            margin: EdgeInsets.all(2.w),
-                            child: Column(
-                              children: [
-                                Text("正在导入中"),
-                                Text("支持 epub zip rar cbz cbr格式的导入")
-                              ],
-                            ),
+                      return WillPopScope(
+                          child: SimpleDialog(
+                            children: [
+                              Container(
+                                margin: EdgeInsets.all(2.w),
+                                child: Column(
+                                  children: [Text("正在导入中"), Text(digshow)],
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      );
+                          onWillPop: () async => false);
                     });
                 FilePickerResult? result =
                     await FilePicker.platform.pickFiles();
@@ -80,8 +83,35 @@ class _libraryviewState extends State<libraryview>
                   print(result.files.single.path!);
                   print(exee);
                   if (exee == ".epub") {
+                    setState(() {
+                      //digshow = "正在导入epub格式文件。解析epub文件需要一定时间，请耐心等待";
+                    });
+
                     await allsec(result.files.single.path!);
-                    getall();
+                    setState(() {
+                      //digshow = "正在进行最后的操作";
+                    });
+                    await getall();
+
+                    Navigator.pop(context);
+                  } else if (exee == ".zip") {
+                    setState(() {
+                      // digshow = "正在导入zip格式文件。解压文件需要一定时间，请耐心等待";
+                    });
+
+                    String zipone = await newzip(result.files.single.path!);
+                    print(zipone);
+                    setState(() {
+                      //digshow = "正在分析文件路径并整理所有文件";
+                    });
+                    var basename = p.basename(result.files.single.path!);
+                    await sortpart(basename);
+                    setState(() {
+                      //digshow = "正在进行最后的操作";
+                    });
+                    await getall();
+                    Navigator.pop(context);
+                  } else {
                     Navigator.pop(context);
                   }
                   //File file = File(result.files.single.path!);

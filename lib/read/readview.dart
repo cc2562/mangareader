@@ -172,7 +172,7 @@ class _readviewState extends State<readview> {
               subtitle: Text(phapage[index]),
             );
           },
-          itemCount: phapage.length,
+          itemCount: phatitle.length,
         ),
       ),
       body: GestureDetector(
