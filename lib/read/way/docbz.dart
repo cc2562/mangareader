@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/widgets.dart';
 import 'dart:io';
 
 import 'package:archive/archive_io.dart';
@@ -10,11 +9,11 @@ import 'package:uuid/uuid.dart';
 import 'dosql.dart';
 
 //解包压缩包等待处理
-Future<String> newzip(List filepath) async {
+Future<String> newcbz(String filepath) async {
   //获取临时文件夹路径
   final Directory tempDir =
       await getTemporaryDirectory(); // Use an InputFileStream to access the zip file without storing it in memory.
-  Directory directory = new Directory('${tempDir.path}/zip');
+  Directory directory = new Directory('${tempDir.path}/cbz');
   try {
     directory.deleteSync(recursive: true);
   } catch (e) {
@@ -23,16 +22,16 @@ Future<String> newzip(List filepath) async {
   directory.createSync();
 
   //创建zip临时目录
-  File orgepub = File(filepath[0]);
+  File orgepub = File(filepath);
   //创建空文件
   print("解压前");
-  orgepub.copySync('${tempDir.path}/zip/1.zip');
+  orgepub.copySync('${tempDir.path}/cbz/1.zip');
   //将文件复制到临时目录下等待解压
   // Use an InputFileStream to access the zip file without storing it in memory.
-  final inputStream = InputFileStream('${tempDir.path}/zip/1.zip');
+  final inputStream = InputFileStream('${tempDir.path}/cbz/1.zip');
   // Decode the zip from the InputFileStream. The archive will have the contents of the
   // zip, without having stored the data in memory.
-  final archive = ZipDecoder().decodeBuffer(inputStream, password: filepath[1]);
+  final archive = ZipDecoder().decodeBuffer(inputStream);
   // For all of the entries in the archive
   for (var file in archive.files) {
     // If it's a file and not a directory
@@ -42,18 +41,17 @@ Future<String> newzip(List filepath) async {
       // that would put it outside of the extraction directory.
       // An OutputFileStream will write the data to disk.
       final outputStream =
-          OutputFileStream('${tempDir.path}/zip/out/${file.name}');
+          OutputFileStream('${tempDir.path}/cbz/out/${file.name}');
       // The writeContent method will decompress the file content directly to disk without
       // storing the decompressed data in memory.
       file.writeContent(outputStream);
-
       // Make sure to close the output stream so the File is closed.
       outputStream.close();
     }
   }
   //文件解压完毕
   print("解压后");
-  Directory outpath = new Directory('${tempDir.path}/zip/out/');
+  Directory outpath = new Directory('${tempDir.path}/cbz/out/');
   //定义目录
   List<FileSystemEntity> alllist = outpath.listSync();
   bool hasdic = false, haspart = true, wrong = false;
@@ -86,12 +84,12 @@ Future<String> newzip(List filepath) async {
   }
 }
 
-Future<String> sortpart(String basename) async {
+Future<String> sortcbz(String basename) async {
   print("运行sort");
   //获取临时文件夹路径
   final Directory tempDir =
       await getTemporaryDirectory(); // Use an InputFileStream to access the zip file without storing it in memory.
-  Directory directory = new Directory('${tempDir.path}/zip/out/');
+  Directory directory = new Directory('${tempDir.path}/cbz/out/');
   //mods1:每个文件每章 mods0:所有文件夹一章
   List<FileSystemEntity> outlist = directory.listSync();
   Map sortmap = {};
@@ -128,7 +126,6 @@ Future<String> sortpart(String basename) async {
         endmap.addAll({
           nowid: element.path,
         });
-        print('nowid:$nowid ;path:${element.path}');
         nowid++;
       }
     }

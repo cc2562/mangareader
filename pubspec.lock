@@ -73,14 +73,6 @@ packages:
       url: "https://mirrors.tuna.tsinghua.edu.cn/dart-pub/"
     source: hosted
     version: "1.0.5"
-  epubx:
-    dependency: "direct main"
-    description:
-      name: epubx
-      sha256: "0ab9354efa177c4be52c46f857bc15bf83f83a92667fb673465c8f89fca26db3"
-      url: "https://mirrors.tuna.tsinghua.edu.cn/dart-pub/"
-    source: hosted
-    version: "4.0.0"
   fake_async:
     dependency: transitive
     description:
@@ -176,14 +168,6 @@ packages:
       url: "https://mirrors.tuna.tsinghua.edu.cn/dart-pub/"
     source: hosted
     version: "3.0.0"
-  image:
-    dependency: transitive
-    description:
-      name: image
-      sha256: "8e9d133755c3e84c73288363e6343157c383a0c6c56fc51afcc5d4d7180306d6"
-      url: "https://mirrors.tuna.tsinghua.edu.cn/dart-pub/"
-    source: hosted
-    version: "3.3.0"
   js:
     dependency: transitive
     description:
@@ -224,6 +208,14 @@ packages:
       url: "https://mirrors.tuna.tsinghua.edu.cn/dart-pub/"
     source: hosted
     version: "1.9.1"
+  modal_bottom_sheet:
+    dependency: "direct main"
+    description:
+      name: modal_bottom_sheet
+      sha256: "3bba63c62d35c931bce7f8ae23a47f9a05836d8cb3c11122ada64e0b2f3d718f"
+      url: "https://mirrors.tuna.tsinghua.edu.cn/dart-pub/"
+    source: hosted
+    version: "3.0.0-pre"
   path:
     dependency: transitive
     description:
@@ -280,14 +272,6 @@ packages:
       url: "https://mirrors.tuna.tsinghua.edu.cn/dart-pub/"
     source: hosted
     version: "2.1.7"
-  petitparser:
-    dependency: transitive
-    description:
-      name: petitparser
-      sha256: cb3798bef7fc021ac45b308f4b51208a152792445cce0448c9a4ba5879dd8750
-      url: "https://mirrors.tuna.tsinghua.edu.cn/dart-pub/"
-    source: hosted
-    version: "5.4.0"
   photo_view:
     dependency: "direct main"
     description:
@@ -328,14 +312,6 @@ packages:
       url: "https://mirrors.tuna.tsinghua.edu.cn/dart-pub/"
     source: hosted
     version: "4.2.4"
-  quiver:
-    dependency: transitive
-    description:
-      name: quiver
-      sha256: b1c1ac5ce6688d77f65f3375a9abb9319b3cb32486bdc7a1e0fdf004d7ba4e47
-      url: "https://mirrors.tuna.tsinghua.edu.cn/dart-pub/"
-    source: hosted
-    version: "3.2.1"
   responsive_sizer:
     dependency: "direct main"
     description:
@@ -445,6 +421,14 @@ packages:
       url: "https://mirrors.tuna.tsinghua.edu.cn/dart-pub/"
     source: hosted
     version: "1.3.2"
+  unrar_file:
+    dependency: "direct main"
+    description:
+      name: unrar_file
+      sha256: "3560f36828f6050ddb904912b0a5f64a4cb4fd80aa9fd50cb55037e105c9c184"
+      url: "https://mirrors.tuna.tsinghua.edu.cn/dart-pub/"
+    source: hosted
+    version: "1.1.0"
   uuid:
     dependency: "direct main"
     description:
@@ -477,14 +461,6 @@ packages:
       url: "https://mirrors.tuna.tsinghua.edu.cn/dart-pub/"
     source: hosted
     version: "1.0.0"
-  xml:
-    dependency: transitive
-    description:
-      name: xml
-      sha256: "5bc72e1e45e941d825fd7468b9b4cc3b9327942649aeb6fc5cdbf135f0a86e84"
-      url: "https://mirrors.tuna.tsinghua.edu.cn/dart-pub/"
-    source: hosted
-    version: "6.3.0"
 sdks:
   dart: ">=3.0.5 <4.0.0"
   flutter: ">=3.10.0"

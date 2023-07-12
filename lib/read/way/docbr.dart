@@ -1,20 +1,20 @@
 import 'dart:convert';
-import 'package:flutter/widgets.dart';
 import 'dart:io';
 
 import 'package:archive/archive_io.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
+import 'package:unrar_file/unrar_file.dart';
 import 'package:uuid/uuid.dart';
 
 import 'dosql.dart';
 
 //解包压缩包等待处理
-Future<String> newzip(List filepath) async {
+Future<String> newcbr(List filepath) async {
   //获取临时文件夹路径
   final Directory tempDir =
       await getTemporaryDirectory(); // Use an InputFileStream to access the zip file without storing it in memory.
-  Directory directory = new Directory('${tempDir.path}/zip');
+  Directory directory = new Directory('${tempDir.path}/cbr');
   try {
     directory.deleteSync(recursive: true);
   } catch (e) {
@@ -24,36 +24,25 @@ Future<String> newzip(List filepath) async {
 
   //创建zip临时目录
   File orgepub = File(filepath[0]);
+  Directory outdic = new Directory('${tempDir.path}/cbr/out/');
+  outdic.createSync();
   //创建空文件
   print("解压前");
-  orgepub.copySync('${tempDir.path}/zip/1.zip');
+  orgepub.copySync('${tempDir.path}/cbr/1.rar');
   //将文件复制到临时目录下等待解压
-  // Use an InputFileStream to access the zip file without storing it in memory.
-  final inputStream = InputFileStream('${tempDir.path}/zip/1.zip');
-  // Decode the zip from the InputFileStream. The archive will have the contents of the
-  // zip, without having stored the data in memory.
-  final archive = ZipDecoder().decodeBuffer(inputStream, password: filepath[1]);
-  // For all of the entries in the archive
-  for (var file in archive.files) {
-    // If it's a file and not a directory
-    if (file.isFile) {
-      // Write the file content to a directory called 'out'.
-      // In practice, you should make sure file.name doesn't include '..' paths
-      // that would put it outside of the extraction directory.
-      // An OutputFileStream will write the data to disk.
-      final outputStream =
-          OutputFileStream('${tempDir.path}/zip/out/${file.name}');
-      // The writeContent method will decompress the file content directly to disk without
-      // storing the decompressed data in memory.
-      file.writeContent(outputStream);
-
-      // Make sure to close the output stream so the File is closed.
-      outputStream.close();
-    }
+  // Extraction may fail, so we use a try/catch PlatformException.
+  try {
+    await UnrarFile.extract_rar(
+        '${tempDir.path}/cbr/1.rar', '${tempDir.path}/cbr/out/',
+        password: filepath[1]);
+  } catch (e) {
+    print("extraction failed $e");
   }
+
   //文件解压完毕
   print("解压后");
-  Directory outpath = new Directory('${tempDir.path}/zip/out/');
+  // Zip a directory to out.zip using the zipDirectory convenience method
+  Directory outpath = new Directory('${tempDir.path}/cbr/out/');
   //定义目录
   List<FileSystemEntity> alllist = outpath.listSync();
   bool hasdic = false, haspart = true, wrong = false;
@@ -86,12 +75,12 @@ Future<String> newzip(List filepath) async {
   }
 }
 
-Future<String> sortpart(String basename) async {
+Future<String> sortcbr(String basename) async {
   print("运行sort");
   //获取临时文件夹路径
   final Directory tempDir =
       await getTemporaryDirectory(); // Use an InputFileStream to access the zip file without storing it in memory.
-  Directory directory = new Directory('${tempDir.path}/zip/out/');
+  Directory directory = new Directory('${tempDir.path}/cbr/out/');
   //mods1:每个文件每章 mods0:所有文件夹一章
   List<FileSystemEntity> outlist = directory.listSync();
   Map sortmap = {};
@@ -118,17 +107,20 @@ Future<String> sortpart(String basename) async {
   Map endmap = {};
   List<String> zhanjiepage = [];
   RegExp imageExp = new RegExp(r'(.*?)\.(png|jpe?g|gif)');
+  RegExp numExp = new RegExp(r'[^0-9]');
   outlist.forEach((FileSystemEntity element) {
     FileStat a = element.statSync();
     //RegExp numberExp = new RegExp(r'^[0-9]\d*$');
     if (a.type.toString() != "directory") {
       //文件
       String name = p.extension(element.path);
+      String filename = p.basename(element.path);
+      filename = filename.replaceAll(new RegExp(r'[^0-9]'), '');
+      print(int.parse(filename));
       if (imageExp.hasMatch(name)) {
         endmap.addAll({
           nowid: element.path,
         });
-        print('nowid:$nowid ;path:${element.path}');
         nowid++;
       }
     }

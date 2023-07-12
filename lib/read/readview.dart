@@ -2,12 +2,13 @@ import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
 import 'dart:ui';
-
+import 'package:path/path.dart' as p;
 import 'package:flutter/material.dart';
 import 'package:glass/glass.dart';
 import 'package:glassmorphism/glassmorphism.dart';
 import 'package:mangareader/read/way/dosql.dart';
 import 'package:mangareader/read/way/onlyimg.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
@@ -24,8 +25,12 @@ class readview extends StatefulWidget {
 class _readviewState extends State<readview> {
   //控制页面可见
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-  bool control = false, manchange = false, hasloading = false;
+  bool control = false,
+      manchange = false,
+      hasloading = false,
+      janpanmode = false;
   double page = 0, nows = 0;
+  String nowimagepath = "";
   int total = 1;
   List imagelist = [], phatitle = [], phapage = [];
   late Directory docDir, conDir;
@@ -66,6 +71,11 @@ class _readviewState extends State<readview> {
     }
     print(widget.conmicmeta);
     print("WAN");
+    if (widget.conmicmeta['readmoe'] == 1) {
+      janpanmode = true;
+    } else {
+      janpanmode = false;
+    }
     setState(() {
       hasloading = true;
       // jumpit();
@@ -85,9 +95,6 @@ class _readviewState extends State<readview> {
     String endpage = perr.toStringAsFixed(1) + "%";
     Map<String, Object?> dochange = {
       'uid': widget.conmicmeta['uid'],
-      'title': widget.conmicmeta['title'],
-      'cover': widget.conmicmeta['cover'],
-      'author': widget.conmicmeta['author'],
       'readpage':
           itemPositionsListener.itemPositions.value.first.index.toString(),
       'percentage': endpage,
@@ -98,7 +105,7 @@ class _readviewState extends State<readview> {
 
   Widget viewlist() {
     return ScrollablePositionedList.builder(
-      //reverse: true,
+      reverse: janpanmode,
       initialScrollIndex: int.parse(widget.conmicmeta['readpage']),
       itemPositionsListener: itemPositionsListener,
       physics: PageScrollPhysics(),
@@ -197,10 +204,23 @@ class _readviewState extends State<readview> {
             });
           } else {
             if (de.globalPosition.dx >= width / 2 && manchange == false) {
-              jumplist.jumpTo(index: (nowpage + 1).toInt());
+              if (janpanmode) {
+                print("JA");
+                if (nowpage >= 1 && manchange == false) {
+                  jumplist.jumpTo(index: (nowpage - 1).toInt());
+                }
+              } else {
+                print("JN");
+
+                jumplist.jumpTo(index: (nowpage + 1).toInt());
+              }
             } else {
-              if (nowpage >= 1 && manchange == false) {
-                jumplist.jumpTo(index: (nowpage - 1).toInt());
+              if (janpanmode) {
+                jumplist.jumpTo(index: (nowpage + 1).toInt());
+              } else {
+                if (nowpage >= 1 && manchange == false) {
+                  jumplist.jumpTo(index: (nowpage - 1).toInt());
+                }
               }
             }
           }
@@ -446,7 +466,124 @@ class _readviewState extends State<readview> {
                                     onPressed: () {
                                       print("12113");
                                       setState(() {
-                                        control = !control;
+                                        showCupertinoModalBottomSheet(
+                                          context: context,
+                                          builder: (context) => Scaffold(
+                                            appBar: AppBar(
+                                              leading: Icon(Icons.settings),
+                                              title: Text("阅读设置"),
+                                            ),
+                                            body: SingleChildScrollView(
+                                                controller:
+                                                    ModalScrollController.of(
+                                                        context),
+                                                child: Container(
+                                                  child: Column(
+                                                    children: [
+                                                      ListView(
+                                                        shrinkWrap: true,
+                                                        physics:
+                                                            NeverScrollableScrollPhysics(),
+                                                        children: [
+                                                          ListTile(
+                                                            title: Text(
+                                                                "将当前页面设置为封面"),
+                                                            subtitle: Text(
+                                                                "设置新的漫画封面"),
+                                                            leading: Icon(
+                                                                Icons.image),
+                                                            trailing: Icon(Icons
+                                                                .chevron_right),
+                                                            onTap: () async {
+                                                              int nindex =
+                                                                  itemPositionsListener
+                                                                      .itemPositions
+                                                                      .value
+                                                                      .first
+                                                                      .index;
+                                                              nowimagepath =
+                                                                  imagelist[
+                                                                      nindex];
+                                                              File tmpfile =
+                                                                  new File(
+                                                                      nowimagepath);
+                                                              var name =
+                                                                  p.basename(
+                                                                      tmpfile
+                                                                          .path);
+                                                              var exnow =
+                                                                  p.extension(
+                                                                      tmpfile
+                                                                          .path);
+                                                              Map<String,
+                                                                      Object?>
+                                                                  dochange = {
+                                                                'uid': widget
+                                                                        .conmicmeta[
+                                                                    'uid'],
+                                                                'cover':
+                                                                    '/image/$name',
+                                                              };
+                                                              Navigator.pop(
+                                                                  context);
+                                                              changeread(
+                                                                  dochange);
+                                                            },
+                                                          ),
+                                                          ListTile(
+                                                            title:
+                                                                Text("修改漫画元信息"),
+                                                            subtitle: Text(
+                                                                "修改漫画名、作者等信息"),
+                                                            leading: Icon(
+                                                                Icons.edit),
+                                                            trailing: Icon(Icons
+                                                                .chevron_right),
+                                                          ),
+                                                          ListTile(
+                                                            title: Text("日漫模式"),
+                                                            subtitle:
+                                                                Text("更改翻页方向"),
+                                                            leading: Icon(Icons
+                                                                .chrome_reader_mode_rounded),
+                                                            trailing: Switch(
+                                                              value: janpanmode,
+                                                              onChanged:
+                                                                  (bool value) {
+                                                                int toset = 0;
+                                                                if (value ==
+                                                                    true) {
+                                                                  toset = 1;
+                                                                } else {
+                                                                  toset = 0;
+                                                                }
+                                                                Map<String,
+                                                                        Object?>
+                                                                    dochange = {
+                                                                  'uid': widget
+                                                                          .conmicmeta[
+                                                                      'uid'],
+                                                                  'readmoe':
+                                                                      toset
+                                                                };
+                                                                Navigator.pop(
+                                                                    context);
+                                                                setState(() {
+                                                                  janpanmode =
+                                                                      value;
+                                                                });
+                                                                changeread(
+                                                                    dochange);
+                                                              },
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      )
+                                                    ],
+                                                  ),
+                                                )),
+                                          ),
+                                        );
                                       });
                                     },
                                     icon: Icon(

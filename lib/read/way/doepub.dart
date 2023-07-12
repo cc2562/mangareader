@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:archive/archive_io.dart';
-import 'package:epubx/epubx.dart';
 import 'package:flutter/material.dart';
 import 'package:glass/glass.dart';
 import 'package:glassmorphism/glassmorphism.dart';

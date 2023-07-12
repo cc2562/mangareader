@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mangareader/read/way/docbr.dart';
+import 'package:mangareader/read/way/docbz.dart';
 import 'package:mangareader/read/way/dosql.dart';
 import 'package:mangareader/read/way/dozip.dart';
 import 'package:path_provider/path_provider.dart';
@@ -37,7 +39,7 @@ class _libraryviewState extends State<libraryview>
     });
     docDir = await getApplicationDocumentsDirectory();
     conDir = new Directory('${docDir.path}/comic');
-    print(conDir);
+    //print(conDir);
     return true;
   }
 
@@ -83,35 +85,123 @@ class _libraryviewState extends State<libraryview>
                   print(result.files.single.path!);
                   print(exee);
                   if (exee == ".epub") {
-                    setState(() {
-                      //digshow = "正在导入epub格式文件。解析epub文件需要一定时间，请耐心等待";
-                    });
-
                     await allsec(result.files.single.path!);
-                    setState(() {
-                      //digshow = "正在进行最后的操作";
-                    });
                     await getall();
-
                     Navigator.pop(context);
                   } else if (exee == ".zip") {
-                    setState(() {
-                      // digshow = "正在导入zip格式文件。解压文件需要一定时间，请耐心等待";
-                    });
-
-                    String zipone = await newzip(result.files.single.path!);
-                    print(zipone);
-                    setState(() {
-                      //digshow = "正在分析文件路径并整理所有文件";
-                    });
+                    //密码输入
+                    showDialog(
+                        barrierDismissible: false,
+                        context: context,
+                        builder: (ctx) {
+                          String pwd = "", mods = "0";
+                          return WillPopScope(
+                              child: SimpleDialog(
+                                title: Text("导入ZIP文件"),
+                                children: [
+                                  Container(
+                                    margin: EdgeInsets.all(2.w),
+                                    child: Column(
+                                      children: [
+                                        Text(
+                                            "如果你的zip文件有密码保护请在下方输入,如果没有请直接点击确定"),
+                                        TextField(
+                                          onChanged: (value) {
+                                            pwd = value;
+                                            mods = "1";
+                                          },
+                                        ),
+                                        ElevatedButton(
+                                            onPressed: () async {
+                                              Navigator.pop(context);
+                                              Future.delayed(
+                                                  Duration(milliseconds: 500),
+                                                  () async {
+                                                try {
+                                                  String zipone = await newzip([
+                                                    result.files.single.path!,
+                                                    pwd,
+                                                    mods
+                                                  ]);
+                                                  print(zipone);
+                                                  var basename = p.basename(
+                                                      result
+                                                          .files.single.path!);
+                                                  await sortpart(basename);
+                                                } catch (e) {
+                                                  //Navigator.pop(context);
+                                                  print("错误!!!!!!!!!!!!!!!");
+                                                  print(e);
+                                                }
+                                                await getall();
+                                                Navigator.pop(context);
+                                              });
+                                            },
+                                            child: Text("确定"))
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              onWillPop: () async => false);
+                        });
+                  } else if (exee == ".cbz") {
+                    String cbzone = await newcbz(result.files.single.path!);
+                    print(cbzone);
                     var basename = p.basename(result.files.single.path!);
-                    await sortpart(basename);
-                    setState(() {
-                      //digshow = "正在进行最后的操作";
-                    });
+                    await sortcbz(basename);
                     await getall();
                     Navigator.pop(context);
-                  } else {
+                  } /*else if (exee == ".rar" || exee == ".cbr") {
+                    showDialog(
+                        barrierDismissible: false,
+                        context: context,
+                        builder: (ctx) {
+                          String pwd = "", mods = "0";
+                          return WillPopScope(
+                              child: SimpleDialog(
+                                title: Text('导入${exee.replaceAll(".", "")}文件'),
+                                children: [
+                                  Container(
+                                    margin: EdgeInsets.all(2.w),
+                                    child: Column(
+                                      children: [
+                                        Text("如果你的文件有密码保护请在下方输入,如果没有请直接点击确定"),
+                                        TextField(
+                                          onChanged: (value) {
+                                            pwd = value;
+                                            mods = "1";
+                                          },
+                                        ),
+                                        ElevatedButton(
+                                            onPressed: () async {
+                                              Navigator.pop(context);
+                                              Future.delayed(
+                                                  Duration(milliseconds: 500),
+                                                  () async {
+                                                String zipone = await newcbr([
+                                                  result.files.single.path!,
+                                                  pwd,
+                                                  mods
+                                                ]);
+                                                print(zipone);
+                                                var basename = p.basename(
+                                                    result.files.single.path!);
+                                                await sortcbr(basename);
+                                                await getall();
+                                                Navigator.pop(context);
+                                              });
+                                            },
+                                            child: Text("确定"))
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              onWillPop: () async => false);
+                        });
+                  } */
+                  else {
                     Navigator.pop(context);
                   }
                   //File file = File(result.files.single.path!);
@@ -161,6 +251,9 @@ class _libraryviewState extends State<libraryview>
                                     children: [
                                       Text(
                                         details['title'],
+                                        overflow: TextOverflow.fade,
+                                        softWrap: false,
+                                        maxLines: 2,
                                         style: TextStyle(
                                           color: Colors.white,
                                           fontSize: 15.sp,
@@ -169,6 +262,9 @@ class _libraryviewState extends State<libraryview>
                                       ),
                                       Text(
                                         details['author'],
+                                        overflow: TextOverflow.fade,
+                                        softWrap: false,
+                                        maxLines: 2,
                                         style: TextStyle(
                                           color: Colors.grey.shade100,
                                           fontSize: 12.sp,
@@ -212,6 +308,40 @@ class _libraryviewState extends State<libraryview>
                     ],
                   ),
                 ),
+                onLongPress: () {
+                  showDialog(
+                      barrierDismissible: true,
+                      context: context,
+                      builder: (ctx) {
+                        String pwd = "", mods = "0";
+                        return WillPopScope(
+                            child: AlertDialog(
+                              title: Text("删除漫画"),
+                              content: Text('确定要删除${details['title']}这一本漫画吗？'),
+                              actions: [
+                                TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: Text("取消")),
+                                TextButton(
+                                    onPressed: () async {
+                                      bool succ =
+                                          await delcomic(details['uid']);
+                                      if (succ) {
+                                        getall();
+                                      }
+                                      Navigator.pop(context);
+                                    },
+                                    child: Text(
+                                      "确定删除",
+                                      style: TextStyle(color: Colors.red),
+                                    ))
+                              ],
+                            ),
+                            onWillPop: () async => true);
+                      });
+                },
                 onTap: () {
                   Navigator.push(
                       context,
