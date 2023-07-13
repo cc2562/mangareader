@@ -28,8 +28,11 @@ class _readviewState extends State<readview> {
   bool control = false,
       manchange = false,
       hasloading = false,
-      janpanmode = false;
+      janpanmode = false,
+      shumode = false;
   double page = 0, nows = 0;
+  ScrollPhysics pagephy = PageScrollPhysics();
+  Axis pageaxis = Axis.horizontal;
   String nowimagepath = "";
   int total = 1;
   List imagelist = [], phatitle = [], phapage = [];
@@ -52,7 +55,6 @@ class _readviewState extends State<readview> {
   void getall() async {
     docDir = await getApplicationDocumentsDirectory();
     conDir = new Directory('${docDir.path}/comic/${widget.conmicmeta['uid']}');
-
     File metafile = new File('${conDir.path}/meta.json');
     String metastr = metafile.readAsStringSync();
     Map meta = json.decode(metastr);
@@ -71,11 +73,26 @@ class _readviewState extends State<readview> {
     }
     print(widget.conmicmeta);
     print("WAN");
+    //日版判断
     if (widget.conmicmeta['readmoe'] == 1) {
       janpanmode = true;
     } else {
       janpanmode = false;
     }
+    if (widget.conmicmeta['shumode'] == 1) {
+      setState(() {
+        shumode = true;
+        pagephy = BouncingScrollPhysics();
+        pageaxis = Axis.vertical;
+      });
+    } else {
+      setState(() {
+        shumode = false;
+        pagephy = PageScrollPhysics();
+        pageaxis = Axis.horizontal;
+      });
+    }
+
     setState(() {
       hasloading = true;
       // jumpit();
@@ -108,40 +125,59 @@ class _readviewState extends State<readview> {
       reverse: janpanmode,
       initialScrollIndex: int.parse(widget.conmicmeta['readpage']),
       itemPositionsListener: itemPositionsListener,
-      physics: PageScrollPhysics(),
-      scrollDirection: Axis.horizontal,
+      physics: pagephy,
+      //
+      scrollDirection: pageaxis,
       itemScrollController: jumplist,
       scrollOffsetController: scrollOffsetController,
       itemBuilder: (context, now) {
 // Find the ScaffoldMessenger in the widget tree
 // and use it to show a SnackBar
-
-        return Container(
-          width: 100.w,
-          height: 100.h,
-          child: Stack(
-            children: [
-              Container(
-                width: 100.w,
-                height: 100.h,
-                child: PhotoView(
-                  imageProvider: FileImage(File(imagelist[now])),
-                  //fit: BoxFit.contain,
-                ),
-              ),
-              Container(
+        if (shumode) {
+          return Container(
+            width: 100.w,
+            //height: 100.h,
+            child: Stack(
+              children: [
+                Container(
                   width: 100.w,
-                  height: 100.h,
-                  alignment: Alignment.bottomLeft,
-                  child: Container(
-                    child: Text(
-                      '${now + 1}/$total',
-                      style: TextStyle(color: Colors.white, fontSize: 12.sp),
-                    ),
-                  ))
-            ],
-          ),
-        );
+                  //height: 100.h,
+                  child: Image(
+                    image: FileImage(File(imagelist[now])),
+                    //fit: BoxFit.contain,
+                  ),
+                ),
+              ],
+            ),
+          );
+        } else {
+          return Container(
+            width: 100.w,
+            height: 100.h,
+            child: Stack(
+              children: [
+                Container(
+                  width: 100.w,
+                  //height: 100.h,
+                  child: PhotoView(
+                    imageProvider: FileImage(File(imagelist[now])),
+                    //fit: BoxFit.contain,
+                  ),
+                ),
+                Container(
+                    width: 100.w,
+                    //height: 100.h,
+                    alignment: Alignment.bottomLeft,
+                    child: Container(
+                      child: Text(
+                        '${now + 1}/$total',
+                        style: TextStyle(color: Colors.white, fontSize: 12.sp),
+                      ),
+                    ))
+              ],
+            ),
+          );
+        }
       },
       itemCount: total,
     );
@@ -574,6 +610,62 @@ class _readviewState extends State<readview> {
                                                                 });
                                                                 changeread(
                                                                     dochange);
+                                                              },
+                                                            ),
+                                                          ),
+                                                          ListTile(
+                                                            title: Text("条漫模式"),
+                                                            subtitle:
+                                                                Text("更改为上下模式"),
+                                                            leading: Icon(Icons
+                                                                .chrome_reader_mode_rounded),
+                                                            trailing: Switch(
+                                                              value: shumode,
+                                                              onChanged:
+                                                                  (bool value) {
+                                                                int toset = 0;
+                                                                if (value ==
+                                                                    true) {
+                                                                  toset = 1;
+                                                                } else {
+                                                                  toset = 0;
+                                                                }
+                                                                Map<String,
+                                                                        Object?>
+                                                                    dochange = {
+                                                                  'uid': widget
+                                                                          .conmicmeta[
+                                                                      'uid'],
+                                                                  'shumode':
+                                                                      toset
+                                                                };
+                                                                Navigator.pop(
+                                                                    context);
+                                                                setState(() {
+                                                                  shumode =
+                                                                      value;
+                                                                });
+                                                                changeread(
+                                                                    dochange);
+                                                                if (shumode) {
+                                                                  setState(() {
+                                                                    shumode =
+                                                                        true;
+                                                                    pagephy =
+                                                                        BouncingScrollPhysics();
+                                                                    pageaxis = Axis
+                                                                        .vertical;
+                                                                  });
+                                                                } else {
+                                                                  setState(() {
+                                                                    shumode =
+                                                                        false;
+                                                                    pagephy =
+                                                                        PageScrollPhysics();
+                                                                    pageaxis = Axis
+                                                                        .horizontal;
+                                                                  });
+                                                                }
                                                               },
                                                             ),
                                                           ),

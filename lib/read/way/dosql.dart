@@ -19,12 +19,12 @@ dynamic create_sql() async {
     onCreate: (db, version) {
       // Run the CREATE TABLE statement on the database.
       return db.execute(
-        'CREATE TABLE allcomic(uid TEXT PRIMARY KEY, title TEXT, cover TEXT,author TEXT,readpage TEXT,percentage TEXT,time INTEGER,readmoe INTEGER)',
+        'CREATE TABLE allcomic(uid TEXT PRIMARY KEY, title TEXT, cover TEXT,author TEXT,readpage TEXT,percentage TEXT,time INTEGER,readmoe INTEGER,shumode INTEGER)',
       );
     },
     // Set the version. This executes the onCreate function and provides a
     // path to perform database upgrades and downgrades.
-    version: 4,
+    version: 5,
   );
 }
 
@@ -41,12 +41,12 @@ Future<void> insertsql(Map mangamap) async {
     onCreate: (db, version) {
       // Run the CREATE TABLE statement on the database.
       return db.execute(
-        'CREATE TABLE allcomic(uid TEXT PRIMARY KEY, title TEXT, cover TEXT,author TEXT,readpage TEXT,percentage TEXT,time INTEGER,readmoe INTEGER)',
+        'CREATE TABLE allcomic(uid TEXT PRIMARY KEY, title TEXT, cover TEXT,author TEXT,readpage TEXT,percentage TEXT,time INTEGER,readmoe ,shumode INTEGER)',
       );
     },
     // Set the version. This executes the onCreate function and provides a
     // path to perform database upgrades and downgrades.
-    version: 4,
+    version: 5,
   );
   final db = await database;
 
@@ -62,7 +62,8 @@ Future<void> insertsql(Map mangamap) async {
     'readpage': mangamap['readpage'],
     'percentage': mangamap['percentage'],
     'time': mangamap['time'],
-    'readmoe': 0
+    'readmoe': 0,
+    'shumode': 0
   };
   await db.insert(
     'allcomic',
@@ -82,12 +83,12 @@ Future<List<Map<String, dynamic>>> allconmic() async {
     onCreate: (db, version) {
       // Run the CREATE TABLE statement on the database.
       return db.execute(
-        'CREATE TABLE allcomic(uid TEXT PRIMARY KEY, title TEXT, cover TEXT,author TEXT,readpage TEXT,percentage TEXT,time INTEGER,readmoe INTEGER)',
+        'CREATE TABLE allcomic(uid TEXT PRIMARY KEY, title TEXT, cover TEXT,author TEXT,readpage TEXT,percentage TEXT,time INTEGER,readmoe INTEGER,shumode INTEGER)',
       );
     },
     // Set the version. This executes the onCreate function and provides a
     // path to perform database upgrades and downgrades.
-    version: 4,
+    version: 5,
   );
   final db = await database;
   final List<Map<String, dynamic>> maps =
