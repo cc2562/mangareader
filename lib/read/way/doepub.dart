@@ -66,7 +66,7 @@ Future<String> doepub(String epubpath) async {
   List<String> fristlist = [], htmllist = [];
   //获取原数据文件
   File metainf = new File('$epubpath/META-INF/container.xml');
-  String tese = "!2";
+  late String tese;
   tese = metainf.readAsStringSync();
   var rootff = RegExp(r'<rootfile full-path=[^>]*>');
   if (rootff.hasMatch(tese)) {
