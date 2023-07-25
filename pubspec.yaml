@@ -50,6 +50,7 @@ dependencies:
   unrar_file: ^1.1.0
   modal_bottom_sheet: ^3.0.0-pre
   url_launcher: ^6.1.12
+  appcenter_sdk_flutter: ^0.5.1
 
 dev_dependencies:
   flutter_test:

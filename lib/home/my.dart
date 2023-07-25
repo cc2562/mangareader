@@ -20,7 +20,7 @@ class _myviewState extends State<myview> {
           children: [
             ListTile(
               title: Text("软件版本"),
-              subtitle: Text("1.0.5"),
+              subtitle: Text("1.0.7"),
               leading: Icon(Icons.archive),
             ),
             ListTile(
