@@ -82,8 +82,8 @@ class _Home_TopState extends State<Home_Top> {
 
                 /// Profile
                 SalomonBottomBarItem(
-                  icon: Icon(Icons.settings),
-                  title: Text("设置"),
+                  icon: Icon(Icons.person),
+                  title: Text("Profile"),
                   selectedColor: Colors.teal,
                 ),
               ],
