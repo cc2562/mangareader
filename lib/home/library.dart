@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:appcenter_sdk_flutter/appcenter_sdk_flutter.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -131,6 +132,12 @@ class _libraryviewState extends State<libraryview>
                                                 } catch (e) {
                                                   //Navigator.pop(context);
                                                   print("错误!!!!!!!!!!!!!!!");
+                                                  await AppCenterCrashes
+                                                      .trackException(
+                                                    message: e.toString(),
+                                                    type: e.runtimeType,
+                                                    //stackTrace: e.toString(),
+                                                  );
                                                   print(e);
                                                 }
                                                 await getall();

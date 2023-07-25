@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:appcenter_sdk_flutter/appcenter_sdk_flutter.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +14,16 @@ import 'package:path/path.dart' as p;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  await AppCenter.start(secret: "a81360f0-0683-4170-9c6a-f16406d87ae7");
+  await AppCenterCrashes.enable();
+  FlutterError.onError = (final details) async {
+    print('错误捕捉ing!!!!!!!!!!!!!!!!!!');
+    await AppCenterCrashes.trackException(
+      message: details.exception.toString(),
+      type: details.exception.runtimeType,
+      stackTrace: details.stack,
+    );
+  };
   runApp(const MyApp());
 }
 
@@ -72,8 +82,8 @@ class _Home_TopState extends State<Home_Top> {
 
                 /// Profile
                 SalomonBottomBarItem(
-                  icon: Icon(Icons.person),
-                  title: Text("Profile"),
+                  icon: Icon(Icons.settings),
+                  title: Text("设置"),
                   selectedColor: Colors.teal,
                 ),
               ],
