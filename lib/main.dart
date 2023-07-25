@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:appcenter_sdk_flutter/appcenter_sdk_flutter.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
