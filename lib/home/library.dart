@@ -24,7 +24,7 @@ class _libraryviewState extends State<libraryview>
     with AutomaticKeepAliveClientMixin {
   List allconmics = [];
   late Directory docDir, conDir;
-  String digshow = "支持 epub zip rar cbz cbr格式的导入";
+  String digshow = "支持 epub zip cbz格式的导入";
   @override
   void initState() {
     // TODO: implement initState

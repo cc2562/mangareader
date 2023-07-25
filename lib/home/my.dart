@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class myview extends StatefulWidget {
   const myview({super.key});
@@ -26,6 +27,9 @@ class _myviewState extends State<myview> {
               title: Text("仓库地址"),
               subtitle: Text("https://github.com/cc2562/mangareader"),
               leading: Icon(Icons.open_in_new_outlined),
+              onTap: () {
+                launchUrl(Uri.parse("https://github.com/cc2562/mangareader"));
+              },
             ),
             ListTile(
               title: Text("软件作者"),
@@ -36,6 +40,9 @@ class _myviewState extends State<myview> {
               title: Text("米饭的博客"),
               subtitle: Text("https://www.ccrice.com"),
               leading: Icon(Icons.link),
+              onTap: () {
+                launchUrl(Uri.parse("https://www.ccrice.com"));
+              },
             ),
           ],
         ));

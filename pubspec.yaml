@@ -49,6 +49,7 @@ dependencies:
   photo_view: ^0.14.0
   unrar_file: ^1.1.0
   modal_bottom_sheet: ^3.0.0-pre
+  url_launcher: ^6.1.12
 
 dev_dependencies:
   flutter_test:
