@@ -44,3 +44,11 @@ jobs:
         with:
           artifacts: "build/app/outputs/flutter-apk/app-release.apk"
           token: ${{ secrets.RELEASE_TOKEN }}
+      # 发布到appcenter
+      - name: pub to app center
+        uses: akiojin/appcenter-distribute-github-action@v1.4.8
+        with:
+          token: 8965623c49e206c9132c672e670e074f5bf077ab
+          path: "build/app/outputs/flutter-apk/app-release.apk"
+          app: "CCRICE/Rice Manga"
+          
