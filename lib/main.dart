@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:appcenter_sdk_flutter/appcenter_sdk_flutter.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -82,8 +81,8 @@ class _Home_TopState extends State<Home_Top> {
 
                 /// Profile
                 SalomonBottomBarItem(
-                  icon: Icon(Icons.settings),
-                  title: Text("设置"),
+                  icon: Icon(Icons.person),
+                  title: Text("Profile"),
                   selectedColor: Colors.teal,
                 ),
               ],
