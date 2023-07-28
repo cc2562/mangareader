@@ -19,3 +19,7 @@
 
 - 自动播放
 
+### 下载地址
+
+https://install.appcenter.ms/users/2371092140-qq.com/apps/rice-manga/distribution_groups/all
+
