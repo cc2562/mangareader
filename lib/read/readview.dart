@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
 import 'dart:ui';
+import 'package:mangareader/read/editmanga.dart';
 import 'package:path/path.dart' as p;
 import 'package:flutter/material.dart';
 import 'package:glass/glass.dart';
@@ -36,6 +37,7 @@ class _readviewState extends State<readview> {
   String nowimagepath = "";
   int total = 1;
   List imagelist = [], phatitle = [], phapage = [];
+  Map<dynamic, dynamic> tmpmap = {};
   late Directory docDir, conDir;
   final ItemScrollController jumplist = new ItemScrollController();
   final ItemPositionsListener itemPositionsListener =
@@ -49,6 +51,7 @@ class _readviewState extends State<readview> {
     // TODO: implement initState
     super.initState();
     print(widget.conmicmeta);
+    tmpmap = Map.of(widget.conmicmeta);
     getall();
   }
 
@@ -94,6 +97,8 @@ class _readviewState extends State<readview> {
     }
 
     setState(() {
+      tmpmap['title'] = meta['title'];
+      //tmpmap['author'] = meta['author'];
       hasloading = true;
       // jumpit();
     });
@@ -324,7 +329,7 @@ class _readviewState extends State<readview> {
                                           height: 6.h,
                                           //color: Colors.yellow,
                                           child: Text(
-                                            widget.conmicmeta['title'],
+                                            tmpmap['title']!,
                                             style: TextStyle(
                                                 fontSize: 18.sp,
                                                 color: Colors.white,
@@ -413,7 +418,7 @@ class _readviewState extends State<readview> {
                                   flex: 1,
                                   child: IconButton(
                                     onPressed: () {
-                                      print("12113");
+                                      //print("12113");
                                       setState(() {
                                         control = !control;
                                       });
@@ -575,6 +580,20 @@ class _readviewState extends State<readview> {
                                                                 Icons.edit),
                                                             trailing: Icon(Icons
                                                                 .chevron_right),
+                                                            onTap: () {
+                                                              showCupertinoModalBottomSheet(
+                                                                      context:
+                                                                          context,
+                                                                      builder:
+                                                                          (context) {
+                                                                        return editmanga(
+                                                                          conmicmeta:
+                                                                              tmpmap,
+                                                                        );
+                                                                      })
+                                                                  .then((value) =>
+                                                                      getall());
+                                                            },
                                                           ),
                                                           ListTile(
                                                             title: Text("日漫模式"),
