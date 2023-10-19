@@ -5,7 +5,6 @@ import 'dart:ui';
 import 'package:mangareader/read/editmanga.dart';
 import 'package:path/path.dart' as p;
 import 'package:flutter/material.dart';
-import 'package:glass/glass.dart';
 import 'package:glassmorphism/glassmorphism.dart';
 import 'package:mangareader/read/way/dosql.dart';
 import 'package:mangareader/read/way/onlyimg.dart';
